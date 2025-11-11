@@ -2,62 +2,42 @@
 
 This ros2 package can be used to stream data from a Vicon mocap system and publish it to custom ROS2 topics.
 This repository has the following changes from the [original code base](https://github.com/OPT4SMART/ros2-vicon-receiver):
-- IPs adapted to the My580 motion capture system
 - Pose information is broadcast as a tf2
 
 If you are using this repo and encounter any problems please report an issue! 
 
 ## Network setup
 
-When connected via ethernet to the Vicon desktop computer, set the IP address manually to 
-192.168.10.1. Use 255.255.255.0 for netmask and 192.168.10.1 for gateway. See [doc/3_network.png](doc/3_network.png) for a screenshot of the Ubuntu settings.
+This repo. works with the Vicon system in UTIAS, room 195. Connect to the following WiFi
+'''Wifi: DSL_DroneNet_5G
+Passwd: He!!0_ARDrones'''
 
-If there are no recognized objects in the Vicon area, it's normal that you don't receive any data. Data will start to be published once your object is registered and actively tracked inside the Vicon software.
+The Vicon ip address (hostname) is '192.168.2.119:801'
 
-In case you still do not receive any data, make sure that the Vicon machine is publishing, and to the correct IP. In particular, Vicon should be publishing via UDP object stream to 192.168.10.2. See [doc/1_vicon_settings.png](doc/1_vicon_settings.png) and [doc/2_vicon_udp.png](doc/2_vicon_udp.png) for where to find these settings.  
+## Vicon DataStream SDK
 
-**Currently, the settings in Myhal 580 have changed to IP address 100.66.64.83 to enable use with Wifi router. Other settings (Buffer length, Port) remain unchanged.**
+Get the official binaries released in the official download page [here](https://www.vicon.com/software/datastream-sdk/?section=downloads).
 
-### Wireless Networking
+You can check the documentation [here](https://docs.vicon.com/spaces/viewspace.action?key=DSSDK19).
 
-To use the wireless router in MY580, connect the Vicon computer to the Wifi router using a network cable. Connect the machine with the vicon receiver to the wifi:
+### Installing on Linux
 
-**Name:       ROB301**
+Copy all the libraries to /usr/local/lib and move the headers to /usr/local/include/ViconDataStreamSDK/.
 
-**Password:   50002399**
-
-The ros node should then be able to see the Vicon data.
-
-## Instructions (from original repository)
-
-**ros2-vicon-receiver** is a ROS2 package, written in C++, that retrieves data from Vicon software and publishes it on ROS2 topics. The code is partly derived from a mixture of [Vicon-ROS2](https://github.com/aheuillet/Vicon-ROS2) and [Vicon bridge](https://github.com/ethz-asl/vicon_bridge).
-
-This is NOT an official ROS2 package and is not supported. The package has been successfully tested with ROS2 Dashing Diademata, ROS2 Foxy and ROS2 Galactic on the operating systems Ubuntu 18.04 Bionic Beaver, Ubuntu 20.04 Focal Fossa and MacOS 10.13 High Sierra.
-
-## Requirements
-
-### Installation of dependencies
-
-If you are using Ubuntu 18.04 Bionic Beaver, you can install all the dependencies by simply `cd`'ing into the main project folder and then running
 ```
-$ ./install_ubuntu_bionic.sh
+sudo mv {YOUR_ViconDataStreamSDK}/Linux64/Release/* /usr/local/lib/
+cd /usr/local/include/
+sudo mkdir ViconDataStreamSDK
+sudo mv ../lib/*.h ViconDataStreamSDK/
 ```
 
-Otherwise, proceed as follows. Make sure you have ROS2 installed (follow the instructions at the [ROS2 website](https://index.ros.org/doc/ros2/Installation/)).
+Update the `LD_LIBRARY_PATH` environment variable:
 
-Then, install [Colcon](https://colcon.readthedocs.io/en/released/index.html) and [CMake](https://cmake.org/) :
-```
-$ sudo apt install -y python3-colcon-common-extensions cmake
-```
+`export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/`
 
-### Installation of Datastream SDK and other libraries
+It's convenient to automatically update this environment variable in your bash session every time a new shell is launched, so type it into your .bashrc file:
 
-The Datastream SDK libraries are required to be installed in the system. You can find them on [the official website](https://www.vicon.com/software/datastream-sdk/?section=downloads).
-
-This package is shipped with Datastream SDK 10.1 (the latest version at the time of writing). If you are running Linux x64 and you want to install this version, simply `cd` into the main project folder and issue the command
-```
-$ ./install_libs.sh
-```
+`echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/"`
 
 ## Quick start
 
