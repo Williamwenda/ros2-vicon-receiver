@@ -9,10 +9,12 @@ If you are using this repo and encounter any problems please report an issue!
 ## Network setup
 
 This repo. works with the Vicon system in UTIAS, room 195. Connect to the following WiFi
-'''Wifi: DSL_DroneNet_5G
-Passwd: He!!0_ARDrones'''
 
-The Vicon ip address (hostname) is '192.168.2.119:801'
+Wifi: DSL_DroneNet_5G
+
+Passwd: He!!0_ARDrones
+
+The Vicon ip address (hostname) is: '192.168.2.119:801'
 
 ## Vicon DataStream SDK
 
