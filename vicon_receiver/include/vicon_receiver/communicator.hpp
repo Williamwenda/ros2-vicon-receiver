@@ -5,6 +5,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "publisher.hpp"
 #include "tf2_ros/transform_broadcaster.h"
+#include "vicon_receiver/msg/markers.hpp"
 
 #include <iostream>
 #include <map>
@@ -24,6 +25,7 @@ private:
     unsigned int buffer_size;
     string ns_name;
     map<string, Publisher> pub_map;
+    map<string, rclcpp::Publisher<vicon_receiver::msg::Markers>::SharedPtr> marker_pub_map;
     boost::mutex mutex;
     std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 

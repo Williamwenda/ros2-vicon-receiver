@@ -138,6 +138,69 @@ void Communicator::get_frame()
                 }
             }
         }
+
+        // Publish marker data for this subject
+        unsigned int marker_count = vicon_client.GetMarkerCount(subject_name).MarkerCount;
+        
+        if (marker_count > 0)
+        {
+            auto markers_msg = vicon_receiver::msg::Markers();
+            markers_msg.header.stamp = this->get_clock()->now();
+            markers_msg.subject_name = subject_name;
+            markers_msg.frame_number = frame_number.FrameNumber;
+
+            for (unsigned int marker_index = 0; marker_index < marker_count; ++marker_index)
+            {
+                string marker_name = vicon_client.GetMarkerName(subject_name, marker_index).MarkerName;
+                
+                // Get marker global translation
+                Output_GetMarkerGlobalTranslation marker_trans = 
+                    vicon_client.GetMarkerGlobalTranslation(subject_name, marker_name);
+                
+                if (marker_trans.Result == ViconDataStreamSDK::CPP::Result::Success)
+                {
+                    vicon_receiver::msg::Marker marker;
+                    marker.marker_name = marker_name;
+                    
+                    // Get parent segment name
+                    Output_GetMarkerParentName parent = 
+                        vicon_client.GetMarkerParentName(subject_name, marker_name);
+                    if (parent.Result == ViconDataStreamSDK::CPP::Result::Success)
+                    {
+                        marker.parent_segment = parent.SegmentName;
+                    }
+                    
+                    marker.translation_x = marker_trans.Translation[0];
+                    marker.translation_y = marker_trans.Translation[1];
+                    marker.translation_z = marker_trans.Translation[2];
+                    marker.occluded = marker_trans.Occluded;
+                    
+                    markers_msg.markers.push_back(marker);
+                }
+            }
+
+            // Publish markers if we have a publisher for this subject
+            boost::mutex::scoped_try_lock lock(mutex);
+            if (lock.owns_lock())
+            {
+                auto marker_pub_it = marker_pub_map.find(subject_name);
+                if (marker_pub_it != marker_pub_map.end())
+                {
+                    marker_pub_it->second->publish(markers_msg);
+                }
+                else
+                {
+                    // Create marker publisher for this subject
+                    string topic_name = ns_name + "/" + subject_name + "/markers";
+                    auto new_publisher = rclcpp::Node::create_publisher<vicon_receiver::msg::Markers>(topic_name, 10);
+                    marker_pub_map[subject_name] = new_publisher;
+                    new_publisher->publish(markers_msg);
+                    
+                    string msg = "Creating marker publisher for subject " + subject_name;
+                    cout << msg << endl;
+                }
+            }
+        }
     }
 }
 

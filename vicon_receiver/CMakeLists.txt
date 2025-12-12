@@ -28,6 +28,9 @@ find_package(rosidl_typesupport_cpp REQUIRED)
 # interfaces
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Position.msg"
+  "msg/Marker.msg"
+  "msg/Markers.msg"
+  DEPENDENCIES std_msgs
 )
 
 ament_export_dependencies(rosidl_default_runtime)
